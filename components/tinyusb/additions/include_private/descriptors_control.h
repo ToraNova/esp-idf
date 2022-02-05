@@ -22,7 +22,7 @@ enum {
 
 //------------- Configuration Descriptor -------------//
 enum {
-#   if CFG_TUD_CDC
+#   if CFG_TUD_CDC || CFG_TUD_ECM_RNDIS
     ITF_NUM_CDC = 0,
     ITF_NUM_CDC_DATA,
 #   endif
@@ -41,6 +41,17 @@ enum {
 #   endif
 
     ITF_NUM_TOTAL
+};
+
+enum
+{
+#if CFG_TUD_ECM_RNDIS
+  CONFIG_ID_RNDIS = 0,
+  CONFIG_ID_ECM   = 1,
+#else
+  CONFIG_ID_NCM   = 0,
+#endif
+  CONFIG_ID_COUNT
 };
 
 enum {

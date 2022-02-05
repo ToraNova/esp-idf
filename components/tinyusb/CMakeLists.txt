@@ -71,6 +71,15 @@ if(CONFIG_TINYUSB)
             "additions/src/vfs_tinyusb.c"
             )
     endif() # CONFIG_TINYUSB_CDC_ENABLED
+
+    if(CONFIG_TINYUSB_NET_ENABLED)
+        list(APPEND srcs
+            "tinyusb/src/class/net/ecm_rndis_device.c"
+            "tinyusb/lib/networking/rndis_reports.c")
+        list(APPEND includes_private
+            "tinyusb/lib/networking")
+    endif()
+
 endif() # CONFIG_TINYUSB
 
 idf_component_register(SRCS ${srcs}

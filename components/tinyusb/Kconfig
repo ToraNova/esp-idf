@@ -159,6 +159,15 @@ menu "TinyUSB Stack"
                 help
                     CDC FIFO size of TX channel.
         endmenu # "Communication Device Class"
+
+        menu "Networking"
+            config TINYUSB_NET_ENABLED
+                bool "Enable TinyUSB Networking feature"
+                default n
+                help
+                    Enable TinyUSB Networking feature.
+        endmenu # "TinyUSB networking (RNDIS, ECM)"
+
     endif # TINYUSB
 
 endmenu # "TinyUSB Stack"

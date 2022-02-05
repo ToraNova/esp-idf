@@ -22,6 +22,29 @@ uint8_t const desc_hid_report[] = {
 };
 #endif
 
+#if CFG_TUD_ECM_RNDIS
+#define EPNUM_NET_NOTIF   0x81
+#define EPNUM_NET_OUT     0x02
+#define EPNUM_NET_IN      0x82
+//main config
+uint8_t const rndis_configuration[] = {
+  // Config number (index+1), interface count, string index, total length, attribute, power in mA
+  TUD_CONFIG_DESCRIPTOR(CONFIG_ID_RNDIS+1, ITF_NUM_TOTAL, 0, TUD_CONFIG_DESC_LEN + TUD_RNDIS_DESC_LEN, 0, 100),
+  // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
+  TUD_RNDIS_DESCRIPTOR(ITF_NUM_CDC, 4, EPNUM_NET_NOTIF, 8, EPNUM_NET_OUT, EPNUM_NET_IN, CFG_TUD_NET_ENDPOINT_SIZE),
+};
+uint8_t const ecm_configuration[] = {
+  // Config number (index+1), interface count, string index, total length, attribute, power in mA
+  TUD_CONFIG_DESCRIPTOR(CONFIG_ID_ECM+1, ITF_NUM_TOTAL, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_ECM_DESC_LEN, 0, 100),
+
+  // Interface number, description string index, MAC address string index, EP notification address and size, EP data address (out, in), and size, max segment size.
+  TUD_CDC_ECM_DESCRIPTOR(ITF_NUM_CDC, 4, 5, EPNUM_NET_NOTIF, 64, EPNUM_NET_OUT, EPNUM_NET_IN, CFG_TUD_NET_ENDPOINT_SIZE, CFG_TUD_NET_MTU),
+};
+uint8_t const *desc_configuration[] = {
+	[CONFIG_ID_RNDIS] = rndis_configuration,
+	[CONFIG_ID_ECM  ] = ecm_configuration
+};
+#else
 uint8_t const desc_configuration[] = {
     // interface count, string index, total length, attribute, power in mA
     TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, TUSB_DESC_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
@@ -43,9 +66,10 @@ uint8_t const desc_configuration[] = {
 
 #   if CFG_TUD_HID
     // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval
-    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 6, HID_PROTOCOL_NONE, sizeof(desc_hid_report), 0x80 | EPNUM_HID, 16, 10)
+    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 6, HID_PROTOCOL_NONE, sizeof(desc_hid_report), 0x80 | EPNUM_HID, 16, 10),
 #   endif
 };
+#endif
 
 // =============================================================================
 // CALLBACKS
@@ -71,8 +95,12 @@ uint8_t const *tud_descriptor_device_cb(void)
  */
 uint8_t const *tud_descriptor_configuration_cb(uint8_t index)
 {
+#if CFG_TUD_ECM_RNDIS
+    return (index < 2) ? desc_configuration[index] : NULL;
+#else
     (void)index; // for multiple configurations
     return desc_configuration;
+#endif
 }
 
 static uint16_t _desc_str[MAX_DESC_BUF_SIZE];
